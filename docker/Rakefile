@@ -1,0 +1,28 @@
+require 'rake'
+require 'my_docker_rake/tasks'
+require 'rspec/core/rake_task'
+include MyDockerRake::Utilities
+
+
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = 'spec/*/*_spec.rb'
+end
+
+MyDockerRake::Tasks.new do |c|
+  c.containers = [
+    {
+      name:  'sample_app.db-data',
+      image: 'hyone/postgresql-data',
+      protect_deletion: true
+    },
+    {
+      name:  'sample_app.db',
+      image: 'hyone/postgresql',
+      volumes_from: ['sample_app.db-data'],
+      ports: [22, 2812, '49200:5432'],
+      options: '--rm'
+    }
+  ]
+
+  c.no_daemon = true
+end

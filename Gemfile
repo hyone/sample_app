@@ -9,13 +9,13 @@ gem 'coffee-rails', '~> 4.0.0'
 gem 'jquery-rails'
 gem 'turbolinks'
 gem 'jbuilder', '~> 1.2'
+gem 'pg'
 
 group :doc do
   gem 'sdoc', require: false
 end
 
 group :development, :test do
-  gem 'sqlite3'
   gem 'rspec-rails'
   gem 'foreman'
 end
@@ -26,6 +26,11 @@ group :test do
 end
 
 group :production do
-  gem 'pg'
   gem 'rails_12factor'
+end
+
+group :docker do
+  gem 'rake'
+  gem 'rspec'
+  gem 'my_docker_rake', github: 'hyone/my_docker_rake'
 end
