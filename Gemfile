@@ -16,8 +16,13 @@ group :doc do
 end
 
 group :development, :test do
-  gem 'rspec-rails'
   gem 'foreman'
+  gem 'rspec-rails'
+  gem 'guard-rspec'
+  gem 'terminal-notifier-guard'
+  gem 'spork-rails'
+  gem 'guard-spork'
+  gem 'childprocess'
 end
 
 group :test do

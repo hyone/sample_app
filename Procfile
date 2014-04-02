@@ -1,2 +1,3 @@
 app: rails server
-db: sh -c 'cd docker; bundle exec rake docker:run'
+db: sh -c 'cd docker; rake docker:run'
+guard: guard
