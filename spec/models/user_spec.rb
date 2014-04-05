@@ -82,6 +82,18 @@ describe User do
     it { should_not be_valid }
   end
 
+  context 'email address with mixed case' do
+    let (:mixed_case_email) { "Foo@ExAMPle.CoM" }
+
+    it "be saved as all lower-case" do
+      @user.email = mixed_case_email
+      @user.save
+      @user.reload
+
+      expect(@user.email).to eq mixed_case_email.downcase
+    end
+  end
+
   context 'when password is not present' do
     before {
       @user = User.new(
