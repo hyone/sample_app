@@ -18,13 +18,15 @@ end
 
 group :development, :test do
   gem 'foreman'
-  gem 'rspec-rails'
+  gem 'hirb'
+  gem 'hirb-unicode'
   gem 'guard-rspec'
-  gem 'terminal-notifier-guard'
-  gem 'spork-rails'
   gem 'guard-spork'
+  gem 'spork-rails'
   gem 'childprocess'
+  gem 'terminal-notifier-guard'
   gem 'pry-rails'
+  gem 'rspec-rails'
 end
 
 group :test do

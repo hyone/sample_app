@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
-  before_save { self.email.downcase! }
+  before_save { email.downcase! }
 
   has_secure_password
 
@@ -7,8 +7,8 @@ class User < ActiveRecord::Base
 
   validates :email,
     presence: true,
-    uniqueness: { case_sensitive: false },
-    format: { with: /\A[\w+\-.]+@(?:[a-z\d\-]+\.)+[a-z]+\z/i }
+    format: { with: /\A[\w+\-.]+@(?:[a-z\d\-]+\.)+[a-z]+\z/i },
+    uniqueness: { case_sensitive: false }
 
   validates :password, length: { minimum: 6 }
 end
