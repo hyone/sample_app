@@ -6,57 +6,45 @@ describe 'UserPages' do
   describe 'signup page' do
     before { visit signup_path }
 
-    let (:submit_title) { 'Create my account' }
+    it { should have_content('Sign up') }
+    it { should have_title(full_title('Sign up')) }
 
     context 'with invalid information' do
       it 'should not create a user' do
-        expect { click_button submit_title }.not_to change(User, :count)
+        expect { invalid_signup }.not_to change(User, :count)
       end
 
       context 'after submission' do
-        before {
-          click_button submit_title
-        }
+        before { invalid_signup }
 
         it { should have_title('Sign up') }
-        it { should have_content(/The form contains.*error(?:s)/) }
+        it { should have_message(:error, /The form contains.*error(?:s)/) }
       end
     end
 
     context 'with valid information' do
-      before {
-        fill_in 'Name',         with: 'Example User'
-        fill_in 'Email',        with: 'user@example.com'
-        fill_in 'Password',     with: 'foobar'
-        fill_in 'Confirmation', with: 'foobar'
-      }
+      let (:user_info) { FactoryGirl.build(:user) }
 
       it 'should create a user' do
-        expect { click_button submit_title }.to change(User, :count).by(1)
+        expect { valid_signup(user_info) }.to change(User, :count).by(1)
       end
 
       context 'after saving the user' do
-        before {
-          click_button submit_title
-        }
-        let (:user) { User.find_by(email: 'user@example.com') }
+        before { valid_signup(user_info) }
+
+        let (:user) { User.find_by(email: user_info.email) }
 
         it { should have_link('Sign out') }
         it { should have_title(user.name) }
         it { should have_message(:success, 'Welcome') }
       end
     end
-
-    it { should have_content('Sign up') }
-    it { should have_title(full_title('Sign up')) }
   end
 
   describe 'profile page' do
     let(:user) { FactoryGirl.create(:user) }
 
-    before {
-      visit user_path(user)
-    }
+    before { visit user_path(user) }
 
     it { should have_content(user.name) }
     it { should have_title(user.name) }
