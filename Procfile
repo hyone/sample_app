@@ -1,3 +1,3 @@
 app: rails server
 db: sh -c 'cd docker; rake docker:run'
-guard: guard
+guard: guard start -i
