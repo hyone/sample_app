@@ -1,2 +1,2 @@
 include ApplicationHelper
-include RequestSpecHelper
+include RequestsHelper
