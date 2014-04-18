@@ -5,10 +5,10 @@
 #   gem 'sqlite3'
 development:
   adapter: postgresql
-  host: 192.168.42.43
-  port: 49200
+  host: <%= ENV.fetch('DB_PORT_5432_TCP_ADDR', '192.168.42.43') %>
+  port: <%= ENV.fetch('DB_PORT_5432_TCP_PORT', 49200) %>
   username: postgres
-  password: V9CBTu4F
+  password: <%= ENV.fetch('DB_ENV_POSTGRESQL_POSTGRES_PASSWORD', 'V9CBTu4F') %>
   database: sample_app2_dev
   pool: 5
 
@@ -17,10 +17,10 @@ development:
 # Do not set this db to the same as development or production.
 test: &test
   adapter: postgresql
-  host: 192.168.42.43
-  port: 49200
+  host: <%= ENV.fetch('DB_PORT_5432_TCP_ADDR', '192.168.42.43') %>
+  port: <%= ENV.fetch('DB_PORT_5432_TCP_PORT', 49200) %>
   username: postgres
-  password: V9CBTu4F
+  password: <%= ENV.fetch('DB_ENV_POSTGRESQL_POSTGRES_PASSWORD', 'V9CBTu4F') %>
   database: sample_app2_test
   pool: 5
 

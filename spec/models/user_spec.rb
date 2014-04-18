@@ -16,6 +16,7 @@ describe User do
     should be_valid
   end
 
+
   describe 'name' do
     it { should respond_to(:name) }
 
@@ -35,6 +36,7 @@ describe User do
       it { should be_invalid }
     end
   end
+
 
   describe 'email' do
     it { should respond_to(:email) }
@@ -103,6 +105,7 @@ describe User do
     end
   end
 
+
   describe 'password' do
     it { should respond_to(:password_digest) }
     it { should respond_to(:password) }
@@ -131,6 +134,7 @@ describe User do
     end
   end
 
+
   describe 'authenticate' do
     # save before execute 'User.find_by' to guarantee @user has persisted to database
     before { @user.save }
@@ -151,11 +155,26 @@ describe User do
     end
   end
 
+
   describe 'remember_token' do
     before { @user.save }
 
     it { should respond_to(:remember_token) }
     its (:remember_token) { should_not be_blank }
+  end
+
+
+  describe 'admin' do
+    it { should respond_to(:admin) }
+
+    context 'with admin attribute "true"' do
+      before {
+        @user.save!
+        @user.toggle!(:admin)
+      }
+
+      it { should be_admin }
+    end
   end
 
 end

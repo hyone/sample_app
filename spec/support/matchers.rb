@@ -18,6 +18,22 @@ module Matchers
     description { 'have signout link' }
   end
 
+  RSpec::Matchers.define :have_profile_link do |user|
+    match do |page|
+      Capybara.string(page.body).has_link?('Profile', href: user_path(user))
+    end
+
+    description { 'have user profile link' }
+  end
+
+  RSpec::Matchers.define :have_settings_link do |user|
+    match do |page|
+      Capybara.string(page.body).has_link?('Settings', href: edit_user_path(user))
+    end
+
+    description { 'have user settings link' }
+  end
+
   RSpec::Matchers.define :have_message do |type, text = nil|
   match do |page|
     Capybara.string(page.body).has_selector?(

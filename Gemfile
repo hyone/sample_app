@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby '2.1.1'
 
 gem 'rails', '4.0.4'
-gem 'bcrypt-ruby'
+gem 'bcrypt'
 gem 'sass-rails', '~> 4.0.2'
 gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.0.0'
@@ -10,6 +10,10 @@ gem 'jquery-rails'
 gem 'bootstrap-sass', '2.3.2.0'
 gem 'turbolinks'
 gem 'jbuilder', '~> 1.2'
+gem 'therubyracer', platforms: :ruby
+gem 'faker'
+gem 'will_paginate'
+gem 'bootstrap-will_paginate'
 gem 'pg'
 
 group :doc do
@@ -33,6 +37,7 @@ group :development do
   gem 'better_errors'
   # dispaly irb/pry(PERL) on better_errors
   gem 'binding_of_caller'
+  gem 'meta_request'
 end
 
 group :test do
@@ -45,10 +50,4 @@ end
 
 group :production do
   gem 'rails_12factor'
-end
-
-group :docker do
-  gem 'rake'
-  gem 'rspec'
-  gem 'my_docker_rake', github: 'hyone/my_docker_rake'
 end
