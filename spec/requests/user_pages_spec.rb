@@ -1,4 +1,6 @@
 require 'spec_helper'
+include RequestsHelper
+
 
 describe 'UserPages' do
   subject { page }
@@ -53,6 +55,13 @@ describe 'UserPages' do
             expect {
               click_link('delete', match: :first)
             }.to change(User, :count).by(-1)
+          end
+
+          it 'should not be able to delete myself' do
+            expect {
+              signin admin, no_capybara: true
+              delete user_path(admin)
+            }.not_to change(User, :count)
           end
         end
       end
@@ -140,6 +149,26 @@ describe 'UserPages' do
       it { should have_signout_link }
       specify { expect(user.reload.name).to  eq new_user.name }
       specify { expect(user.reload.email).to eq new_user.email }
+    end
+
+    context 'with forbidden attributes' do
+      let (:params) {
+        {
+          user: {
+            admin: true,
+            password: user.password,
+            password_confirmation: user.password
+          }
+        }
+      }
+      before {
+        signin user, no_capybara: true
+        patch user_path(user), params
+      }
+
+      specify {
+        expect(user.reload).not_to be_admin
+      }
     end
   end
 end

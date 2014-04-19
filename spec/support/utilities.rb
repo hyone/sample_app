@@ -1,2 +1,1 @@
 include ApplicationHelper
-include RequestsHelper

@@ -1,4 +1,6 @@
 require 'spec_helper'
+include RequestsHelper
+
 
 describe "AuthenticationPages" do
 
@@ -15,7 +17,6 @@ describe "AuthenticationPages" do
 
       context 'after visiting another page' do
         before { click_link 'Home' }
-
         it { should_not have_message(:error, 'error') }
       end
     end
@@ -24,21 +25,41 @@ describe "AuthenticationPages" do
       let (:user) { FactoryGirl.create(:user) }
       before { signin(user) }
 
-      it { should have_link('Users', href: users_path) }
+      it 'redirect to the user page' do
+        expect(current_path).to be == user_path(user)
+      end
 
-      # in account column
+      context 'followd by signout' do 
+        before { click_link 'Sign out' }
+        it { should have_link('Sign in') }
+      end
+    end
+  end
+
+  describe 'header content' do
+    before { visit signin_path }
+    let (:user) { FactoryGirl.create(:user) }
+
+    context 'without signin' do
+      it { should_not have_link('Users', href: users_path) }
+      # Account tab
+      it { should_not have_title(user.name) }
+      it { should_not have_profile_link(user) }
+      it { should_not have_settings_link(user) }
+      it { should_not have_signout_link }
+      it { should have_signin_link }
+    end
+
+    context 'with signin' do
+      before { signin(user) }
+
+      it { should have_link('Users', href: users_path) }
+      # Account tab
       it { should have_title(user.name) }
       it { should have_profile_link(user) }
       it { should have_settings_link(user) }
       it { should have_signout_link }
       it { should_not have_signin_link }
-
-      context 'followd by signout' do 
-        before {
-          click_link 'Sign out'
-        }
-        it { should have_link('Sign in') }
-      end
     end
   end
 
@@ -61,7 +82,30 @@ describe "AuthenticationPages" do
               expect(current_path).to be == edit_user_path(user)
               should have_title('Edit user')
             end
+
+            context 'sigin again without specifying redirect location' do
+              before {
+                delete signout_path
+                signin(user)
+              }
+
+              it 'should render the default profile page' do
+                expect(page).to have_title(user.name)
+              end
+            end
           end
+        end
+
+        context 'when visiting the new page' do
+          before { visit new_user_path }
+          specify { expect(current_path).to be == new_user_path }
+        end
+
+        context 'when submitting a POST reqeust to the Users#new action' do
+          let (:user) { FactoryGirl.build(:user) }
+          before { post users_path, user: user.attributes }
+
+          specify { expect(response.status).to be == 200 }
         end
 
         context 'when visiting the edit page' do
@@ -98,14 +142,34 @@ describe "AuthenticationPages" do
         end
       end
 
-      context 'with non admin user' do
+      context 'with regular user (non admin)' do
         let (:user) { FactoryGirl.create(:user) }
         let (:non_admin_user) { FactoryGirl.create(:user) }
-        before { signin non_admin_user, no_capybara: true }
 
-        context 'when submitting a DELETE reqeust to the Users#destroy action' do
-          before { delete user_path(user) }
-          specify { expect(response).to redirect_to(root_path) }
+        context 'in pages' do
+          before {
+            signin(non_admin_user)
+          }
+
+          context 'when visiting the new page' do
+            before { visit new_user_path }
+            specify { expect(current_path).to be == root_path }
+          end
+        end
+
+        context 'in apis' do
+          before { signin non_admin_user, no_capybara: true }
+
+          context 'when submitting a POST reqeust to the Users#new action' do
+            let (:new_user) { FactoryGirl.build(:user) }
+            before { post users_path, user: new_user.attributes }
+            specify { expect(response).to redirect_to(root_path) }
+          end
+
+          context 'when submitting a DELETE reqeust to the Users#destroy action' do
+            before { delete user_path(user) }
+            specify { expect(response).to redirect_to(root_path) }
+          end
         end
       end
     end

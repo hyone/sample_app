@@ -34,8 +34,12 @@ module SessionsHelper
 
 
   def redirect_back_or(default)
+    logger.info default
+    logger.info "redirect: #{session[:return_to]}"
     redirect_to(session[:return_to] || default)
     session.delete(:return_to)
+    logger.info "SESSION DELETED"
+    logger.info "redirect: #{session[:return_to]}"
   end
 
   def set_redirect_location
