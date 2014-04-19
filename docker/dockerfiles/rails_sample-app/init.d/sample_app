@@ -1,0 +1,36 @@
+#!/bin/sh
+
+PIDFILE="/var/run/sample_app.pid"
+
+export APP_ROOT=${APP_ROOT:-/project}
+
+start() {
+  cd ${APP_ROOT}
+
+  start-stop-daemon --start --quiet --background -m \
+    --pidfile ${PIDFILE} \
+    --exec /project/bin/bootstrap.sh
+}
+
+stop() {
+   start-stop-daemon --stop --quiet --pidfile ${PIDFILE}
+   if [ -e ${PIDFILE} ]
+     then rm ${PIDFILE}
+   fi
+}
+
+
+# See how we were called.
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop}"
+    exit 2
+esac
+
+exit $?
