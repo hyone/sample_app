@@ -1,0 +1,16 @@
+<% provide(:title, 'Edit user') %>
+
+<h1>Update your profile</h1>
+
+<div class='row'>
+  <div class='span6 offset3'>
+    <%= render partial: 'form', locals: { submit_button: 'Save changes' } %>
+  </div>
+</div>
+
+<div class='row'>
+  <div class='span6 offset3'>
+    <%= gravatar_for @user %>
+    <a href="http://gravatar.com/emails" target="_blank">change</a>
+  </div>
+</div>

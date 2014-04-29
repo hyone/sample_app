@@ -5,68 +5,69 @@ include RequestsHelper
 describe 'UserPages' do
   subject { page }
 
-    describe 'index page' do
-      before {
-        user = FactoryGirl.create(:user)
-        FactoryGirl.create(:user, name: 'Bob', email: 'bob@example.com')
-        FactoryGirl.create(:user, name: 'Ben', email: 'ben@example.com')
-        signin user
-        visit users_path
+  describe 'index page' do
+    before {
+      user = FactoryGirl.create(:user)
+      FactoryGirl.create(:user, name: 'Bob', email: 'bob@example.com')
+      FactoryGirl.create(:user, name: 'Ben', email: 'ben@example.com')
+      signin user
+      visit users_path
+    }
+
+    describe 'content' do
+      it { should have_title('All users') }
+      it { should have_content('All users') }
+    end
+
+    describe 'pagination' do
+      before(:all) {
+        50.times { FactoryGirl.create(:user) }
+      }
+      after(:all) {
+        User.delete_all
       }
 
-      describe 'content' do
-        it { should have_title('All users') }
-        it { should have_content('All users') }
-      end
+      it { should have_selector('div.pagination') }
 
-      describe 'pagination' do
-        before(:all) {
-          50.times { FactoryGirl.create(:user) }
-        }
-        after(:all) {
-          User.delete_all
-        }
-
-        it { should have_selector('div.pagination') }
-
-        it 'should list each user in page 1' do
-          User.paginate(page: 1).each do |user|
-            expect(page).to have_selector('li', text: user.name)
-          end
+      it 'should list each user in page 1' do
+        User.paginate(page: 1).each do |user|
+          expect(page).to have_selector('li', text: user.name)
         end
       end
-
-      describe 'delete links' do
-        context 'with non admin user' do
-          it { should_not have_link('delete') }
-        end
-
-        context 'with admin user ' do
-          let (:admin) { FactoryGirl.create(:admin) }
-          before {
-            signin admin
-            visit users_path
-          }
-
-          it { should have_link('delete', href: user_path(User.first)) }
-          it { should_not have_link('delete', href: user_path(admin)) }
-
-          it 'should be able to delete another user' do
-            expect {
-              click_link('delete', match: :first)
-            }.to change(User, :count).by(-1)
-          end
-
-          it 'should not be able to delete myself' do
-            expect {
-              signin admin, no_capybara: true
-              delete user_path(admin)
-            }.not_to change(User, :count)
-          end
-        end
-      end
-
     end
+
+    describe 'delete links' do
+      context 'with non admin user' do
+        it { should_not have_link('delete') }
+      end
+
+      context 'with admin user ' do
+        let (:admin) { FactoryGirl.create(:admin) }
+        before {
+          signin admin
+          visit users_path
+        }
+
+        it { should have_link('delete', href: user_path(User.first)) }
+        it { should_not have_link('delete', href: user_path(admin)) }
+
+        it 'should be able to delete another user' do
+          expect {
+            click_link('delete', match: :first)
+          }.to change(User, :count).by(-1)
+        end
+
+        it 'should not be able to delete myself' do
+          expect {
+            signin admin, no_capybara: true
+            delete user_path(admin)
+          }.not_to change(User, :count)
+        end
+      end
+    end
+
+  end
+
 
   describe 'signup page' do
     before { visit signup_path }
@@ -108,12 +109,20 @@ describe 'UserPages' do
 
 
   describe 'profile page' do
-    let(:user) { FactoryGirl.create(:user) }
+    let (:user) { FactoryGirl.create(:user) }
+    let! (:m1) { FactoryGirl.create(:micropost, user: user, content: 'Foo') }
+    let! (:m2) { FactoryGirl.create(:micropost, user: user, content: 'Bar') }
 
     before { visit user_path(user) }
 
     it { should have_content(user.name) }
     it { should have_title(user.name) }
+
+    describe 'microposts' do
+      it { should have_content(m1.content) }
+      it { should have_content(m2.content) }
+      it { should have_content(user.microposts.count) }
+    end
   end
 
 

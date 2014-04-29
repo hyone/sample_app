@@ -45,4 +45,14 @@ module SessionsHelper
   def set_redirect_location
     session[:return_to] = request.url
   end
+
+
+  # authorization
+
+  def require_signin_user
+    unless signin?
+      set_redirect_location
+      redirect_to signin_url, notice: 'Please sign in.'
+    end
+  end
 end

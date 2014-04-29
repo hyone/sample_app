@@ -96,31 +96,48 @@ describe "AuthenticationPages" do
           end
         end
 
-        context 'when visiting the new page' do
-          before { visit new_user_path }
-          specify { expect(current_path).to be == new_user_path }
+        describe 'Users controller' do
+          context 'when visiting the new page' do
+            before { visit new_user_path }
+            specify { expect(current_path).to be == new_user_path }
+          end
+
+          context 'when submitting a POST reqeust to the Users#new action' do
+            let (:user) { FactoryGirl.build(:user) }
+            before { post users_path, user: user.attributes }
+
+            specify { expect(response.status).to be == 200 }
+          end
+
+          context 'when visiting the edit page' do
+            before { visit edit_user_path(user) }
+            it { expect(current_path).to be == signin_path }
+          end
+
+          context 'when submitting to the update action' do
+            before { patch user_path(user) }
+            specify { expect(response).to redirect_to(signin_path) }
+          end
+
+          context 'when visiting the user index' do
+            before { visit users_path }
+            it { expect(current_path).to be == signin_path }
+          end
         end
 
-        context 'when submitting a POST reqeust to the Users#new action' do
-          let (:user) { FactoryGirl.build(:user) }
-          before { post users_path, user: user.attributes }
+        describe 'Microposts controller' do
+          context 'when submitting the the create action' do
+            before { post microposts_path }
+            specify { expect(response).to redirect_to(signin_path) }
+          end
 
-          specify { expect(response.status).to be == 200 }
-        end
-
-        context 'when visiting the edit page' do
-          before { visit edit_user_path(user) }
-          it { expect(current_path).to be == signin_path }
-        end
-
-        context 'when submitting to the update action' do
-          before { patch user_path(user) }
-          specify { expect(response).to redirect_to(signin_path) }
-        end
-
-        context 'when visiting the user index' do
-          before { visit users_path }
-          it { expect(current_path).to be == signin_path }
+          context 'when submitting the destroy action' do
+            before {
+              micropost = FactoryGirl.create(:micropost)
+              delete micropost_path(micropost)
+            }
+            specify { expect(response).to redirect_to(signin_path) }
+          end
         end
       end
 

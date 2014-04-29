@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe User do
   before {
     @user = User.new(
@@ -12,7 +13,7 @@ describe User do
 
   subject { @user }
 
-  it "original user is valid" do
+  it "original user should be valid" do
     should be_valid
   end
 
@@ -175,6 +176,63 @@ describe User do
 
       it { should be_admin }
     end
+  end
+
+
+  # has_many
+  describe 'microposts' do
+    it { should respond_to(:microposts) }
+
+    context 'association' do
+      before { @user.save }
+
+      let! (:micropost1) {
+        FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+      }
+      let! (:micropost2) {
+        FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+      }
+      let! (:micropost3) {
+        FactoryGirl.create(:micropost, user: @user, created_at: 3.hour.ago)
+      }
+
+      it 'should have the right microposts in the right order' do
+        expect(@user.microposts.to_a).to eq [micropost2, micropost3, micropost1]
+      end
+
+      context 'when user has deleted' do
+        it 'should also remove all associated microposts' do
+          # 'to_a' method creates a copy of the micropost objects
+          microposts = @user.microposts.to_a
+
+          @user.destroy
+          expect(microposts).not_to be_empty
+
+          microposts.each do |micropost|
+            expect(Micropost.where(id: micropost.id)).to be_empty
+          end
+        end
+      end
+    end
+  end
+
+
+  describe 'feed' do
+    before { @user.save }
+
+    let! (:micropost1) {
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    }
+    let! (:micropost2) {
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    }
+    let! (:unfollowd_post) {
+      FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+    }
+
+    its(:feed) { should include(micropost1) }
+    its(:feed) { should include(micropost2) }
+    its(:feed) { should_not include(unfollowd_post) }
   end
 
 end
