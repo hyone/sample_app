@@ -177,6 +177,20 @@ input {
   @extend .error;
 }
 
+#micropost_form_footer {
+  text-align: right;
+}
+
+#micropost_content_count {
+  padding-right: 1em;
+  display: inline;
+  font-size: 16px;
+  color: #999;
+}
+
+#micropost_submit {
+}
+
 
 /* users index */
 

@@ -12,14 +12,17 @@ describe 'StaticPages' do
 
 
   describe 'Home page' do
-    before { visit root_path }
     let (:heading) { 'Sample App' }
     let (:page_title) { '' }
 
-    it_should_behave_like 'all static pages'
-    it { should_not have_title('| Home') }
+    context 'with non signin user' do
+      before { visit root_path }
 
-    context 'With signin user' do
+      it_should_behave_like 'all static pages'
+      it { should_not have_title('| Home') }
+    end
+
+    context 'with signin user' do
       let (:user) { FactoryGirl.create(:user) }
       before {
         FactoryGirl.create(:micropost, user: user, content: 'Lorem ipsum')
@@ -28,9 +31,46 @@ describe 'StaticPages' do
         visit root_path
       }
 
-      it "should render the user's feed" do
-        user.feed.each do |item|
-          expect(page).to have_selector("li##{item.id}", text: item.content)
+      context "in feed" do
+        context 'in pagination' do
+          before {
+            50.times { |i| FactoryGirl.create(:micropost, user: user) }
+            visit root_path
+          }
+
+          it { should have_selector('div.pagination') }
+
+          it "should render the user's feed in page 1" do
+            user.feed.paginate(page: 1).each do |item|
+              expect(page).to have_selector("li##{item.id}", text: item.content)
+            end
+          end
+
+          it 'should not display delete links in microposts of anyone else' do
+            user.feed.paginate(page: 1).each do |item|
+              unless item.user_id == user.id
+                expect(page).not_to have_selector("li#{item.id}", text: item.content)
+              end
+            end
+          end
+        end
+      end
+
+      context 'in sidebar' do
+        context 'with multiple microposts' do
+          it 'should render the correct microposts number' do
+            expect(page).to have_content(/#{user.microposts.count} microposts\b/)
+          end
+        end
+
+        context 'with single micropost' do
+          before {
+            user.microposts.first.destroy
+            visit root_path
+          }
+          it 'should render 1 micropost' do
+            expect(page).to have_content(/1 micropost\b/)
+          end
         end
       end
     end
