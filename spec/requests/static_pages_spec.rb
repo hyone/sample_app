@@ -57,20 +57,34 @@ describe 'StaticPages' do
       end
 
       context 'in sidebar' do
-        context 'with multiple microposts' do
-          it 'should render the correct microposts number' do
-            expect(page).to have_content(/#{user.microposts.count} microposts\b/)
+        context 'about microposts counts' do
+          context 'with multiple microposts' do
+            it 'should render the correct microposts number' do
+              expect(page).to have_content(/#{user.microposts.count} microposts\b/)
+            end
           end
+
+          context 'with single micropost' do
+            before {
+              user.microposts.first.destroy
+              visit root_path
+            }
+            it 'should render 1 micropost' do
+              expect(page).to have_content(/1 micropost\b/)
+            end
+          end
+
         end
 
-        context 'with single micropost' do
+        context 'about follower/following counts' do
+          let (:other_user) { FactoryGirl.create(:user) }
           before {
-            user.microposts.first.destroy
+            other_user.follow!(user)
             visit root_path
           }
-          it 'should render 1 micropost' do
-            expect(page).to have_content(/1 micropost\b/)
-          end
+
+          it { should have_link('0 following', href: following_user_path(user)) }
+          it { should have_link('1 followers', href: followers_user_path(user)) }
         end
       end
     end

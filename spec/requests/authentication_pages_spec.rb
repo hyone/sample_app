@@ -69,6 +69,18 @@ describe "AuthenticationPages" do
       let (:user) { FactoryGirl.create(:user) }
 
       context 'with non siginin users' do
+        shared_examples_for 'redirect to signin page' do
+          it {
+            # capybara
+            if current_path
+              expect(current_path).to be == signin_path
+            # otherwise, from respone that send http request directly
+            else
+              expect(response).to redirect_to(signin_path)
+            end
+          }
+        end
+
         # friendly forwarding
         context 'when attempting to visit a protect page' do
           before {
@@ -111,24 +123,34 @@ describe "AuthenticationPages" do
 
           context 'when visiting the edit page' do
             before { visit edit_user_path(user) }
-            it { expect(current_path).to be == signin_path }
+            it_should_behave_like 'redirect to signin page'
           end
 
           context 'when submitting to the update action' do
             before { patch user_path(user) }
-            specify { expect(response).to redirect_to(signin_path) }
+            it_should_behave_like 'redirect to signin page'
           end
 
           context 'when visiting the user index' do
             before { visit users_path }
-            it { expect(current_path).to be == signin_path }
+            it_should_behave_like 'redirect to signin page'
+          end
+
+          context 'when visiting the following page' do
+            before { visit following_user_path(user) }
+            it_should_behave_like 'redirect to signin page'
+          end
+
+          context 'when visiting the followers page' do
+            before { visit followers_user_path(user) }
+            it_should_behave_like 'redirect to signin page'
           end
         end
 
         describe 'Microposts controller' do
-          context 'when submitting the the create action' do
+          context 'when submitting the create action' do
             before { post microposts_path }
-            specify { expect(response).to redirect_to(signin_path) }
+            it_should_behave_like 'redirect to signin page'
           end
 
           context 'when submitting the destroy action' do
@@ -136,7 +158,22 @@ describe "AuthenticationPages" do
               micropost = FactoryGirl.create(:micropost)
               delete micropost_path(micropost)
             }
-            specify { expect(response).to redirect_to(signin_path) }
+            it_should_behave_like 'redirect to signin page'
+          end
+        end
+
+        describe 'Relationships controller' do
+          context 'when submitting the create action' do
+            before { post relationships_path }
+            it_should_behave_like 'redirect to signin page'
+          end
+
+          context 'when submitting to the destroy action' do
+            # hardcoded followed_id
+            # because the action should redirect to signin_path before extracting followed_id,
+            # so do not use it.
+            before { delete relationship_path(1) }
+            it_should_behave_like 'redirect to signin page'
           end
         end
       end

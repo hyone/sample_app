@@ -217,6 +217,57 @@ describe User do
   end
 
 
+  # has_many
+  describe 'relationships' do
+    it { should respond_to(:relationships) }
+  end
+
+  describe 'followed_users' do
+    it { should respond_to(:followed_users) }
+  end
+
+  describe 'following?' do
+    it { should respond_to(:following?) }
+  end
+
+  describe 'follow!' do
+    it { should respond_to(:follow!) }
+  end
+
+  describe 'unfollow!' do
+    it { should respond_to(:unfollow!) }
+  end
+
+  describe 'followers' do
+    it { should respond_to(:followers) }
+  end
+
+  context 'about follow' do
+    let (:other_user) { FactoryGirl.create(:user) }
+    before {
+      @user.save
+      @user.follow!(other_user)
+    }
+
+    context 'when following' do
+      it { should be_following(other_user) }
+      its (:followed_users) { should include(other_user) }
+    end
+
+    context 'then unfollowing' do
+      before { @user.unfollow!(other_user) }
+
+      it { should_not be_following(other_user) }
+      its (:followed_users) { should_not include(other_user) }
+    end
+
+    context 'From follower' do
+      subject { other_user }
+      its (:followers) { should include(@user) }
+    end
+  end
+
+
   describe 'feed' do
     before { @user.save }
 
@@ -229,10 +280,21 @@ describe User do
     let! (:unfollowd_post) {
       FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
     }
+    let (:followed_user) { FactoryGirl.create(:user) }
+
+    before {
+      @user.follow!(followed_user)
+      3.times { followed_user.microposts.create!(content: 'Lorem ipsum') }
+    }
 
     its(:feed) { should include(micropost1) }
     its(:feed) { should include(micropost2) }
     its(:feed) { should_not include(unfollowd_post) }
+    its(:feed) {
+      followed_user.microposts.each do |micropost|
+        should include(micropost)
+      end
+    }
   end
 
 end
